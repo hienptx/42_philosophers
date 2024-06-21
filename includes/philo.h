@@ -14,3 +14,18 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+typedef struct p_struct
+{
+    int         *data;
+}               t_philo;
+
+//agrs_handling.c
+int args_handling(int ac, char **av);
+int	str_arg_handling(char *s);
+
+//philo.c
+
+//philo_utils.c
+int	ft_atoi(const char *str);
+int	ft_isspace(int c);
+int	ft_isdigit(int x);

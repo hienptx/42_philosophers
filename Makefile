@@ -12,19 +12,22 @@
 
 NAME = philo
 
-CC = cc -lpthread
-CFLAGS = -Wall -Wextra -Werror -I./includes
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -I./includes -lpthread
 # LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
+LSAN = -fsanitize=thread -g
 
-LSAN = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -g
+SRCS = philo.c args_handling.c philo_utils.c
+OBJS = $(SRCS:.c=.o)
 
-SRCS = philo.c args_handlind.c
-OBJS = (SRCS:%.o=%.c)
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
-	$(CC) $(CFLAGS) $(LSAN) -o $a $(OBJS)
+	@echo "Creating archive: $(NAME)"
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
 clean:
 	rm -f $(OBJS)
@@ -33,3 +36,5 @@ fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
+
+.PHONY: all clean fclean re

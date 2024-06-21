@@ -7,16 +7,22 @@
 void err_message(int err)
 {
     if (err == 1)
-        printf("Error: Number of Arguments is 4 or 5");
+        printf("Error: Arguments\n");
+    if (err == 2)
+        printf("Error: Invalid Arguments\n");
 }
 
 int main(int ac, char **av)
 {
+    // t_philo *agrs;
+
+    // agrs = NULL;
     if (ac < 5 || ac > 6)
     {
         err_message(1);
-        return (0);
+        return (1);
     }
-    args_handling(ac, av);
+    if (!args_handling(ac, av))
+        err_message(2);
     return (0);
 }
