@@ -13,14 +13,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <sys/time.h>
 
-typedef struct p_struct
-{
-    int         *data;
-}               t_philo;
+// typedef struct p_struct
+// {
+//     int     nbr_of_philo;
+//     int     time_to_die;
+// }               t_philo;
+
+// typedef struct timeval
+// {
+//     long tv_sec;
+//     long tv_usec;
+// }   t_time;
 
 //agrs_handling.c
-int args_handling(int ac, char **av);
+int args_handling(int ac, char **av, int *args);
 int	str_arg_handling(char *s);
 
 //philo.c

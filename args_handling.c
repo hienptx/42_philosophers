@@ -33,21 +33,17 @@ int	str_arg_handling(char *s)
 	return (1);
 }
 
-int args_handling(int ac, char **av)
+int args_handling(int ac, char **av, int *args)
 {
     int i;
-    int val[ac - 1];
 
     i = 1;
     while (i < ac)
     {
         if (!str_arg_handling(av[i]))
             return (0);
-        val[i - 1] = ft_atoi(av[i]);
+        args[i - 1] = ft_atoi(av[i]);
         i++;
     }
-    //print arguments value
-    for(int x = 0; x < ac; x++)
-        printf("val = %i\n", val[x]);
     return (1);
 }

@@ -13,7 +13,7 @@
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I./includes -lpthread
+CFLAGS = -Wall -Wextra -Werror -I./includes -pthread
 # LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
 LSAN = -fsanitize=thread -g
 
