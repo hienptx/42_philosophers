@@ -6,17 +6,35 @@
 #    By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/19 16:32:40 by hipham            #+#    #+#              #
-#    Updated: 2024/06/19 18:30:06 by hipham           ###   ########.fr        #
+#    Updated: 2024/06/23 14:40:26 by hipham           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
-SRCS_DIR = ./srcs
-OBJS_DIR = ./objs
-
-CC = cc -pthread
-CFLAGS = -Wall -Wextra -Werror
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -I./includes -pthread
 # LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
+LSAN = -fsanitize=thread -g
 
-LSAN = -fsanitize=address -fsanitize=leak -fno-omit-frame-pointer -g
+SRCS = philo.c args_handling.c philo_utils.c
+OBJS = $(SRCS:.c=.o)
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+all: $(NAME)
+
+$(NAME): $(OBJS)
+	@echo "Creating archive: $(NAME)"
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+
+clean:
+	rm -f $(OBJS)
+
+fclean: clean
+	rm -f $(NAME)
+
+re: fclean all
+
+.PHONY: all clean fclean re
