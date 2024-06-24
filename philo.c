@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
+/*   Updated: 2024/06/24 18:20:32 by hipham           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 // memset, printf, malloc, free, write,
@@ -10,52 +22,87 @@
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
 
-void *timestamp_ms()
+int	even_or_odd(int num)
 {
-    struct timeval tv;
-    long ms;
-
-    gettimeofday(&tv, NULL);
-    printf("tv_sec = %li\n", tv.tv_sec);
-    printf("tv_usec = %li\n", tv.tv_usec);
-    ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-    printf("%li\n", ms);
-    return NULL;    
+	return (num % 2);
 }
 
-void thread_philo(int  *args)
+void	*philo_routine(void *arg)
 {
-    pthread_t tpid;
-    int nbr_of_philo;
-
-    nbr_of_philo = args[0];
-    printf("nbr of philo = %i\n", nbr_of_philo);
-    pthread_create(&tpid, NULL, timestamp_ms, NULL);
-    pthread_join(tpid, NULL);
+	t_philo *attr;
+	
+	attr = (t_philo *)arg;
+	printf("has taken a fork\n");
+	return (NULL);
 }
 
-void err_message(int err)
+long	timestamp_ms(void)
 {
-    if (err == 1)
-        printf("Error: Arguments\n");
-    if (err == 2)
-        printf("Error: Invalid Arguments\n");
+	struct timeval	tv;
+	long			ms;
+
+	gettimeofday(&tv, NULL);
+	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	printf("%li ", ms);
+	return (ms);
 }
 
-int main(int ac, char **av)
+void	*thread_philo(t_philo *attr)
 {
-    int args[ac - 1];
+	pthread_t	phi_thread[attr->nbr_of_philo];
+	int			i;
 
-    if (ac < 5 || ac > 6)
-    {
-        err_message(1);
-        return (1);
-    }
-    if (!args_handling(ac, av, args))
-        err_message(2);
-    thread_philo(args);
-    //print arguments value
-    for(int x = 0; x < ac - 1; x++)
-        printf("val = %i\n", args[x]);
-    return (0);
+	i = 1;
+	if (attr->nbr_of_philo == 1)
+	{
+		timestamp_ms();
+		printf("has taken a fork\n");
+		printf("1 died\n");
+		return (NULL);
+	}
+	while (i <= attr->nbr_of_philo)
+	{
+		timestamp_ms();
+		printf("%i ", i);
+		pthread_create(&phi_thread[i], NULL, philo_routine, (void *)attr);
+		pthread_join(phi_thread[i], NULL);
+		i++;
+	}
+	return (NULL);
 }
+
+void pass_val_to_philo_struct(int ac, int *args, t_philo *attr)
+{
+	attr->nbr_of_philo = args[0];
+	attr->time_to_die = args[1];
+	attr->time_to_eat = args[2];
+	attr->time_to_sleep = args[3];
+	if (ac == 6)
+		attr->nbr_of_meals = args[4];
+
+}
+
+int	main(int ac, char **av)
+{
+	pthread_mutex_t	mutex;
+	t_philo			attr;
+
+	int	args[ac - 1];
+	if (ac < 5 || ac > 6)
+	{
+		err_message(1);
+		return (1);
+	}
+	if (!args_handling(ac, av, args))
+		err_message(2);
+	pass_val_to_philo_struct(ac, args, &attr);
+	pthread_mutex_init(&mutex, NULL);
+	gettimeofday(&attr.start, NULL);
+	thread_philo(&attr);
+	pthread_mutex_destroy(&mutex);
+	return (0);
+}
+
+// print arguments value
+// for(int x = 0; x < ac - 1; x++)
+//     printf("val = %i\n", args[x]);
