@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/06/24 18:19:54 by hipham           ###   ########.fr       */
+/*   Updated: 2024/06/24 19:20:23 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,3 +43,5 @@ int			ft_atoi(const char *str);
 int			ft_isspace(int c);
 int			ft_isdigit(int x);
 void		err_message(int err);
+
+this line is a test
