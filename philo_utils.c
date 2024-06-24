@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo_utils.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/23 14:48:15 by hipham            #+#    #+#             */
+/*   Updated: 2024/06/23 14:49:38 by hipham           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 int	ft_atoi(const char *str)
@@ -37,4 +49,12 @@ int	ft_isdigit(int x)
 	if (!(48 <= x && x <= 57))
 		return (0);
 	return (1);
+}
+
+void	err_message(int err)
+{
+	if (err == 1)
+		printf("Error: Arguments\n");
+	if (err == 2)
+		printf("Error: Invalid Arguments\n");
 }
