@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/06/24 19:20:23 by hipham           ###   ########.fr       */
+/*   Updated: 2024/06/25 18:43:23 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@ typedef struct p_struct
 	long	time_to_eat;
 	int		nbr_of_meals;
 	struct timeval start;
+	int		*philo_id;
 }			t_philo;
 
 // typedef struct timeval
@@ -44,4 +45,3 @@ int			ft_isspace(int c);
 int			ft_isdigit(int x);
 void		err_message(int err);
 
-this line is a test

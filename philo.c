@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/06/24 18:20:32 by hipham           ###   ########.fr       */
+/*   Updated: 2024/06/25 19:51:03 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,43 +27,50 @@ int	even_or_odd(int num)
 	return (num % 2);
 }
 
+long	timestamp_ms(t_philo *attr)
+{
+	struct timeval	tv;
+	long			start_ms;
+	long			ms;
+	long			ret;
+
+	gettimeofday(&tv, NULL);
+	start_ms = (attr->start.tv_sec * 1000) + (attr->start.tv_usec / 1000);
+	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	ret = ms - start_ms;
+	printf("%li ", ret);
+	return (ret);
+}
+
 void	*philo_routine(void *arg)
 {
 	t_philo *attr;
+	int fork_count;
+	pthread_mutex_t	mutex;
 	
+	fork_count = 2;
 	attr = (t_philo *)arg;
-	printf("has taken a fork\n");
+	while (fork_count-- > 0)
+	{
+		pthread_mutex_unlock(&mutex);
+		timestamp_ms(attr);
+		printf("%i ", *(attr)->philo_id);
+		printf("has taken a fork\n");
+		pthread_mutex_lock(&mutex);
+	}
 	return (NULL);
 }
 
-long	timestamp_ms(void)
-{
-	struct timeval	tv;
-	long			ms;
-
-	gettimeofday(&tv, NULL);
-	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	printf("%li ", ms);
-	return (ms);
-}
 
 void	*thread_philo(t_philo *attr)
 {
 	pthread_t	phi_thread[attr->nbr_of_philo];
-	int			i;
+	int 		i;
 
 	i = 1;
-	if (attr->nbr_of_philo == 1)
-	{
-		timestamp_ms();
-		printf("has taken a fork\n");
-		printf("1 died\n");
-		return (NULL);
-	}
 	while (i <= attr->nbr_of_philo)
 	{
-		timestamp_ms();
-		printf("%i ", i);
+		*attr->philo_id = i;
 		pthread_create(&phi_thread[i], NULL, philo_routine, (void *)attr);
 		pthread_join(phi_thread[i], NULL);
 		i++;
