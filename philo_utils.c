@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:15 by hipham            #+#    #+#             */
-/*   Updated: 2024/06/23 14:49:38 by hipham           ###   ########.fr       */
+/*   Updated: 2024/06/26 18:10:47 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,4 +57,11 @@ void	err_message(int err)
 		printf("Error: Arguments\n");
 	if (err == 2)
 		printf("Error: Invalid Arguments\n");
+}
+
+void *malloc_error(void *ptr)
+{
+	if (ptr == NULL)
+		free(ptr);
+	return(NULL);
 }
