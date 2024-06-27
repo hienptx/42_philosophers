@@ -10,9 +10,16 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "includes/philo.h"
 
-void    *taking_fork()
+void	*philo_routine(t_philo_attr *p_attr)
 {
-    
+	int i;
+
+	i = -1;
+	while (i++ < p_attr->attr->nbr_of_philo - 1)
+    {
+		printf("%i\n", p_attr[i].philo_id);
+	}
+	return (NULL);
 }

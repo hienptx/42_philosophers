@@ -17,7 +17,7 @@ CFLAGS = -Wall -Wextra -Werror -I./includes -pthread
 # LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
 LSAN = -fsanitize=thread -g
 
-SRCS = philo.c args_handling.c philo_utils.c
+SRCS = philo.c args_handling.c philo_utils.c philo_routine.c
 OBJS = $(SRCS:.c=.o)
 
 %.o: %.c

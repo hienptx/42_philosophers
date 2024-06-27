@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "includes/philo.h"
 
 int	ft_atoi(const char *str)
 {
@@ -64,4 +64,10 @@ void *malloc_error(void *ptr)
 	if (ptr == NULL)
 		free(ptr);
 	return(NULL);
+}
+
+void *ft_free(void *ptr)
+{
+	free(ptr);
+	return (NULL);
 }

@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "philo.h"
+#include "includes/philo.h"
 
 // memset, printf, malloc, free, write,
 // usleep, gettimeofday
@@ -21,11 +21,6 @@
 // to convert to milliseconds. The microseconds (tv.tv_usec) are divided by 1000
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
-
-int	even_or_odd(int num)
-{
-	return (num % 2);
-}
 
 long	timestamp_ms(t_philo *attr)
 {
@@ -42,47 +37,17 @@ long	timestamp_ms(t_philo *attr)
 	return (ret);
 }
 
-// int go_eat(t_philo *attr)
-// {
-// 	int eat_status;
-
-// 	eat_status = 0;
-// }
-
-// void	*philo_routine(void *arg)
-// {
-// 	t_philo *attr;
-// 	int fork_count;
-// 	int i;
-	
-// 	i = 0;
-// 	fork_count = 2;
-// 	attr = (t_philo *)arg;
-// 	while (fork_count-- > 0)
-// 	{
-// 		pthread_mutex_unlock(&attr->mutex);
-// 		printf("%li ", timestamp_ms(attr));
-// 		printf("%i ", *attr->philo_id);
-// 		printf("has taken a fork\n");
-// 		// go_eat()
-// 		pthread_mutex_lock(&attr->mutex);
-// 	}
-// 	return (NULL);
-// }
-
 void *create_fork(void *arg)
 {
 	t_philo_attr *attr;
-	// t_philo_attr *ptr;
 
 	attr = (t_philo_attr *)arg;
 	pthread_mutex_lock(&attr->attr->mutex);
 	attr->attr->fork_id = malloc(attr->attr->nbr_of_philo * sizeof(int)); // FREE
-	if (attr->attr->fork_id == NULL)
-		return (NULL);
-	printf("Philo_id = %i ", attr->philo_id);
+	malloc_error(attr->attr->fork_id);
+	// printf("Philo_id = %i ", attr->philo_id);
 	attr->attr->fork_id[attr->philo_id - 1] = attr->philo_id;
-	printf("Fork_id = %i \n", attr->attr->fork_id[attr->philo_id - 1]);
+	// printf("Fork_id = %i \n", attr->attr->fork_id[attr->philo_id - 1]);
 	pthread_mutex_unlock(&attr->attr->mutex);
 	return (NULL);
 }
@@ -92,42 +57,30 @@ void	*thread_philo(t_philo *attr)
 	int 		i;
 	t_philo_attr *p_attr;
 
-	i = 0;
-	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t));
-	if (attr->p_thread == NULL)
-		return (NULL);
-	p_attr = malloc(attr->nbr_of_philo * sizeof(t_philo_attr));
-	if (p_attr == NULL)
-	{
-		free(attr->p_thread);
-		return (NULL);
-	}
-	while (i < attr->nbr_of_philo)
+	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
+	malloc_error(attr->p_thread);
+	p_attr = malloc(attr->nbr_of_philo * sizeof(t_philo_attr)); //FREE
+	malloc_error(attr->p_thread);
+	i = -1;
+	while (++i < attr->nbr_of_philo)
 	{
 		p_attr[i].philo_id = i + 1;
 		p_attr[i].attr = attr;
 		if (pthread_create(&attr->p_thread[i], NULL, create_fork, (void *)&p_attr[i]) != 0)
-		{
-			free(attr->p_thread);
-			return (NULL);
-		}
-		i++;
+			ft_free(attr->p_thread);
 	}
-	i = 0;
-	while (i < attr->nbr_of_philo)
+	philo_routine(p_attr);
+	i = -1;
+	while (++i < attr->nbr_of_philo)
 	{
-		printf("%i\n", p_attr[i].philo_id);
+		// printf("%i\n", p_attr[i].philo_id);
 		if (pthread_join(attr->p_thread[i], NULL) != 0)
-		{
-			free(attr->p_thread);
-			return (NULL);
-		}
-		i++;
+			ft_free(attr->p_thread);
 	}
 	return (NULL);
 }
 
-void pass_val_to_philo_struct(int ac, int *args, t_philo *attr)
+void info_struct(int ac, int *args, t_philo *attr)
 {
 	attr->nbr_of_philo = args[0];
 	attr->time_to_die = args[1];
@@ -150,7 +103,7 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
-	pass_val_to_philo_struct(ac, args, &attr);
+	info_struct(ac, args, &attr);
 	pthread_mutex_init(&attr.mutex, NULL);
 	gettimeofday(&attr.start, NULL);
 	thread_philo(&attr);
