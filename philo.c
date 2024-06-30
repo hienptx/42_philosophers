@@ -22,34 +22,57 @@
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
 
-long	timestamp_ms(t_philo *attr)
+
+
+long	get_time_now()
 {
 	struct timeval	tv;
-	long			start_ms;
+	long			ms;
+
+	gettimeofday(&tv, NULL);
+	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (ms);
+}
+
+long	timestamp_ms(t_philo *attr)
+{
 	long			ms;
 	long			ret;
 
-	gettimeofday(&tv, NULL);
-	start_ms = (attr->start.tv_sec * 1000) + (attr->start.tv_usec / 1000);
-	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-	ret = ms - start_ms;
-	// printf("%li ", ret);
+	ms = get_time_now();
+	ret = ms - attr->start;
 	return (ret);
 }
 
-void *create_fork(void *arg)
+void initialize_forks(t_philo *attr)
 {
-	t_philo_attr *attr;
+	int i;
 
-	attr = (t_philo_attr *)arg;
-	pthread_mutex_lock(&attr->attr->mutex);
-	attr->attr->fork_id = malloc(attr->attr->nbr_of_philo * sizeof(int)); // FREE
-	malloc_error(attr->attr->fork_id);
-	// printf("Philo_id = %i ", attr->philo_id);
-	attr->attr->fork_id[attr->philo_id - 1] = attr->philo_id;
-	// printf("Fork_id = %i \n", attr->attr->fork_id[attr->philo_id - 1]);
-	pthread_mutex_unlock(&attr->attr->mutex);
-	return (NULL);
+	i = -1;
+	attr->fork_mutexes = malloc(attr->nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
+	malloc_error(attr->fork_mutexes);
+	while (++i < attr->nbr_of_philo)
+		pthread_mutex_init(&attr->fork_mutexes[i], NULL);
+}
+
+void create_threads(t_philo_attr *p_attr, t_philo *attr)
+{
+	int i; 
+
+	i = -1;
+	while (++i < attr->nbr_of_philo)
+	{
+		p_attr[i].philo_id = i + 1;
+		p_attr[i].attr = attr;
+		if (pthread_create(&attr->p_thread[i], NULL, philo_routine, (void *)&p_attr[i]) != 0)
+			ft_free(attr->p_thread);
+	}
+	i = -1;
+	while (++i < attr->nbr_of_philo)
+	{ 
+		if (pthread_join(attr->p_thread[i], NULL) != 0)
+			ft_free(attr->p_thread);
+	}
 }
 
 void	*thread_philo(t_philo *attr)
@@ -61,41 +84,50 @@ void	*thread_philo(t_philo *attr)
 	malloc_error(attr->p_thread);
 	p_attr = malloc(attr->nbr_of_philo * sizeof(t_philo_attr)); //FREE
 	malloc_error(attr->p_thread);
-	i = -1;
+	initialize_forks(attr);
+	create_threads(p_attr, attr);
+	i = -1;	
 	while (++i < attr->nbr_of_philo)
-	{
-		p_attr[i].philo_id = i + 1;
-		p_attr[i].attr = attr;
-		if (pthread_create(&attr->p_thread[i], NULL, create_fork, (void *)&p_attr[i]) != 0)
-			ft_free(attr->p_thread);
-	}
-	philo_routine(p_attr);
-	i = -1;
-	while (++i < attr->nbr_of_philo)
-	{
-		// printf("%i\n", p_attr[i].philo_id);
-		if (pthread_join(attr->p_thread[i], NULL) != 0)
-			ft_free(attr->p_thread);
-	}
+		pthread_mutex_destroy(&attr->fork_mutexes[i]);
+	free(attr->fork_mutexes);
+    free(attr->p_thread);
+    free(p_attr);
 	return (NULL);
 }
 
-void info_struct(int ac, int *args, t_philo *attr)
+void init_philos(int ac, int *args, t_philo *ph, t_philo_attr *ph_attr)
 {
-	attr->nbr_of_philo = args[0];
-	attr->time_to_die = args[1];
-	attr->time_to_eat = args[2];
-	attr->time_to_sleep = args[3];
-	if (ac == 6)
-		attr->nbr_of_meals = args[4];
+	int i;
 
+	ph->nbr_of_philo = args[0];
+	ph->time_to_die = args[1];
+	ph->time_to_eat = args[2];
+	ph->time_to_sleep = args[3];
+	if (ac == 6)
+		ph->nbr_of_meals = args[4];
+	else
+		ph->nbr_of_meals = -1;
+	i = -1;
+	while (++i < ph->nbr_of_philo)
+	{
+		ph[i].done_eating = 0;
+		ph[i].meals_eaten = 0;
+		ph[i].is_dead = 0;
+		ph[i].last_meal = get_time_now();
+		ph[i].start = get_time_now();
+		ph[i].death_mutex = &ph_attr->death_mutex;
+		ph[i].write_mutex = &ph_attr->write_mutex;
+		ph[i].meal_mutex = &ph_attr->meal_mutex;
+	}
 }
 
 int	main(int ac, char **av)
 {
+	// pthread_t		m_thread;
 	t_philo			attr;
+	t_philo_attr	p_attr;
+	int				args[ac - 1];
 
-	int	args[ac - 1];
 	if (ac < 5 || ac > 6)
 	{
 		err_message(1);
@@ -103,11 +135,14 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
-	info_struct(ac, args, &attr);
-	pthread_mutex_init(&attr.mutex, NULL);
-	gettimeofday(&attr.start, NULL);
+	pthread_mutex_init(&p_attr.death_mutex, NULL);
+	pthread_mutex_init(&p_attr.write_mutex, NULL);
+	pthread_mutex_init(&p_attr.meal_mutex, NULL);
+	init_philos(ac, args, &attr, &p_attr);
 	thread_philo(&attr);
-	pthread_mutex_destroy(&attr.mutex);
+	pthread_mutex_destroy(&p_attr.death_mutex);
+	pthread_mutex_destroy(&p_attr.write_mutex);
+	pthread_mutex_destroy(&p_attr.meal_mutex);
 	return (0);
 }
 
