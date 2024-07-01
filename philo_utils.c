@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:15 by hipham            #+#    #+#             */
-/*   Updated: 2024/06/26 18:10:47 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/01 17:46:14 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,28 @@ void *malloc_error(void *ptr)
 	return(NULL);
 }
 
-void *ft_free(void *ptr)
+int ft_free(void *ptr)
 {
 	free(ptr);
-	return (NULL);
+	return (0);
+}
+
+long	get_time_now()
+{
+	struct timeval	tv;
+	long			ms;
+
+	gettimeofday(&tv, NULL);
+	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+	return (ms);
+}
+
+long	timestamp_ms(t_philo *attr)
+{
+	long			ms;
+	long			ret;
+
+	ms = get_time_now();
+	ret = ms - attr->start;
+	return (ret);
 }
