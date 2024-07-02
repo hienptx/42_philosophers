@@ -34,28 +34,25 @@ void eat(t_philo *attr, int id)
 {
     int left;  
     int right;
-	
+
 	left = id - 1;
-    right = (id % attr->nbr_of_philo);
+    right = (left + 1) % attr->nbr_of_philo;
 
-	pthread_mutex_lock(&attr->fork_mutexes[right]);
-	return_message("has taken r-fork\n", attr, id);
-
+	pthread_mutex_lock(&attr->fork_mutexes[left]);
+	return_message(" has taken l-fork\n", attr, id);
 	if (attr->nbr_of_philo == 1) 
     {
 		usleep(attr->time_to_die * 1000);
         pthread_mutex_unlock(&attr->fork_mutexes[right]);
         return ;
     }
+	pthread_mutex_lock(&attr->fork_mutexes[right]);
+	return_message("has taken r-fork\n", attr, id);
 
-	pthread_mutex_lock(&attr->fork_mutexes[left]);
-	return_message(" has taken l-fork\n", attr, id);
-    
 	return_message("is eating\n", attr, id);
 	usleep(attr->time_to_eat * 1000);
 	
-
-    pthread_mutex_lock(attr[id].meal_mutex);
+	pthread_mutex_lock(attr[id].meal_mutex);
 	attr[id].last_meal = get_time_now();
 	attr[id].done_eating = 1;
 	attr[id].meals_eaten++;
@@ -71,7 +68,7 @@ void *philo_routine(void *arg)
 	t_philo_attr *p_attr;
 
 	p_attr = (t_philo_attr *)arg;
-    while (if_dead(p_attr))
+    while (1)
 	{	
 		return_message("is thinking\n", p_attr->attr, p_attr->philo_id);
         eat(p_attr->attr, p_attr->philo_id);

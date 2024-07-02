@@ -58,9 +58,9 @@ void destroy_and_free(t_philo_attr *p_attr)
 	pthread_mutex_destroy(&p_attr->death_mutex);
 	pthread_mutex_destroy(&p_attr->write_mutex);
 	pthread_mutex_destroy(&p_attr->meal_mutex);
+	pthread_mutex_destroy(&p_attr->attr->waiter);
 	free(p_attr->attr->fork_mutexes);
 	free(p_attr->attr->p_thread);
-	// free(p_attr);
 }
 
 void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
@@ -92,6 +92,7 @@ void init_program(t_philo_attr *p_attr)
 	pthread_mutex_init(&p_attr->death_mutex, NULL);
 	pthread_mutex_init(&p_attr->write_mutex, NULL);
 	pthread_mutex_init(&p_attr->meal_mutex, NULL);
+	pthread_mutex_init(&p_attr->attr->waiter, NULL);
 }
 
 void init_philos(int ac, int *args, t_philo *ph, t_philo_attr *ph_attr)

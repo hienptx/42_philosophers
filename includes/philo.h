@@ -32,6 +32,7 @@ typedef struct p_philo
 	pthread_mutex_t	*death_mutex;
 	pthread_mutex_t	*write_mutex;
 	pthread_t		*p_thread;
+	pthread_mutex_t	waiter;
 	pthread_mutex_t	*fork_mutexes;
 }					t_philo;
 
