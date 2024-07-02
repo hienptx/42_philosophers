@@ -57,7 +57,7 @@ int					str_arg_handling(char *s);
 int				create_threads(t_philo_attr *p_attr, t_philo *attr);
 void				destroy_and_free(t_philo_attr *p_attr);
 void				*fork_mutexes(t_philo *attr, t_philo_attr *p_attr);
-void				init_program(t_philo *attr, t_philo_attr *p_attr);
+void				init_program(t_philo_attr *p_attr);
 void				init_philos(int ac, int *args, t_philo *ph,
 						t_philo_attr *ph_attr);
 // philo_routine.c
@@ -69,7 +69,7 @@ int					ft_atoi(const char *str);
 int					ft_isspace(int c);
 int					ft_isdigit(int x);
 void				err_message(int err);
-void				*malloc_error(void *ptr);
+void				malloc_error(void *ptr);
 int					ft_free(void *ptr);
 long				get_time_now(void);
 long				timestamp_ms(t_philo *attr);

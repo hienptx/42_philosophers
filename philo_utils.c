@@ -59,11 +59,10 @@ void	err_message(int err)
 		printf("Error: Invalid Arguments\n");
 }
 
-void *malloc_error(void *ptr)
+void malloc_error(void *ptr)
 {
 	if (ptr == NULL)
 		free(ptr);
-	return(NULL);
 }
 
 int ft_free(void *ptr)
@@ -84,10 +83,10 @@ long	get_time_now()
 
 long	timestamp_ms(t_philo *attr)
 {
-	long			ms;
+	long			now;
 	long			ret;
 
-	ms = get_time_now();
-	ret = ms - attr->start;
+	now = get_time_now();;
+	ret = now - attr->start;
 	return (ret);
 }

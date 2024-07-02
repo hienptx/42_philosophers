@@ -53,24 +53,30 @@ void destroy_and_free(t_philo_attr *p_attr)
 	int i;
 
 	i = -1;
+	while (++i < p_attr->attr->nbr_of_philo)
+		pthread_mutex_destroy(&p_attr->attr->fork_mutexes[i]);
 	pthread_mutex_destroy(&p_attr->death_mutex);
 	pthread_mutex_destroy(&p_attr->write_mutex);
 	pthread_mutex_destroy(&p_attr->meal_mutex);
-	while (++i < p_attr->attr->nbr_of_philo)
-		pthread_mutex_destroy(&p_attr->attr->fork_mutexes[i]);
 	free(p_attr->attr->fork_mutexes);
 	free(p_attr->attr->p_thread);
-	free(p_attr);
+	// free(p_attr);
 }
 
 void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
 {
 	int 		i;
 	
+	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
+	if (attr->p_thread == NULL)
+		return (NULL);
 	i = -1;
 	attr->fork_mutexes = malloc(attr->nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
 	if (attr->fork_mutexes == NULL)
-		malloc_error(attr->fork_mutexes);
+	{
+		free(attr->p_thread);
+		return(NULL);
+	}
 	while (++i < attr->nbr_of_philo)
 		pthread_mutex_init(&attr->fork_mutexes[i], NULL);
 	if(!create_threads(p_attr, attr))
@@ -81,12 +87,8 @@ void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
 	return (NULL);
 }
 
-void init_program(t_philo *attr, t_philo_attr *p_attr)
+void init_program(t_philo_attr *p_attr)
 {
-	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
-	malloc_error(attr->p_thread);
-	p_attr = malloc(attr->nbr_of_philo * sizeof(t_philo_attr)); //FREE
-	malloc_error(attr->p_thread);
 	pthread_mutex_init(&p_attr->death_mutex, NULL);
 	pthread_mutex_init(&p_attr->write_mutex, NULL);
 	pthread_mutex_init(&p_attr->meal_mutex, NULL);
@@ -100,18 +102,18 @@ void init_philos(int ac, int *args, t_philo *ph, t_philo_attr *ph_attr)
 	ph->time_to_die = args[1];
 	ph->time_to_eat = args[2];
 	ph->time_to_sleep = args[3];
+	ph->start = get_time_now();
 	if (ac == 6)
 		ph->nbr_of_meals = args[4];
 	else
 		ph->nbr_of_meals = -1;
-	i = -1;
-	while (++i < ph->nbr_of_philo)
+	i = 0;
+	while (++i <= ph->nbr_of_philo)
 	{
 		ph[i].done_eating = 0;
 		ph[i].meals_eaten = 0;
-		ph[i].is_dead = 0;
+		ph[i].is_dead = 1;
 		ph[i].last_meal = get_time_now();
-		ph[i].start = get_time_now();
 		ph[i].death_mutex = &ph_attr->death_mutex;
 		ph[i].write_mutex = &ph_attr->write_mutex;
 		ph[i].meal_mutex = &ph_attr->meal_mutex;
@@ -131,8 +133,8 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
+	init_program(&p_attr);
 	init_philos(ac, args, &attr, &p_attr);
-	init_program(&attr, &p_attr);
 	fork_mutexes(&attr, &p_attr);
 	destroy_and_free(&p_attr);
 	return (0);
