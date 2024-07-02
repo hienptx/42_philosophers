@@ -25,11 +25,11 @@
 int create_threads(t_philo_attr *p_attr, t_philo *attr)
 {
 	int i; 
-	pthread_t		monitor_thread;
+	// pthread_t		monitor_thread;
 
 	i = -1;
-	if (pthread_create(&monitor_thread, NULL, &monitor, (void *)attr) != 0)
-		ft_free(monitor_thread);
+	// if (pthread_create(&monitor_thread, NULL, &monitor, (void *)attr) != 0)
+	// 	ft_free(&monitor_thread);
 	while (++i < attr->nbr_of_philo)
 	{
 		p_attr[i].philo_id = i + 1;
@@ -37,8 +37,8 @@ int create_threads(t_philo_attr *p_attr, t_philo *attr)
 		if (pthread_create(&attr->p_thread[i], NULL, philo_routine, (void *)&p_attr[i]) != 0)
 			ft_free(attr->p_thread);
 	}
-	if (pthread_join(monitor_thread, NULL) != 0)
-		ft_free(monitor_thread);
+	// if (pthread_join(monitor_thread, NULL) != 0)
+	// 	ft_free(&monitor_thread);
 	i = -1;
 	while (++i < attr->nbr_of_philo)
 	{ 

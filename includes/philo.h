@@ -62,7 +62,7 @@ void				init_philos(int ac, int *args, t_philo *ph,
 						t_philo_attr *ph_attr);
 // philo_routine.c
 void				*philo_routine(void *agr);
-void				return_message(char *str, t_philo *attr, t_philo_attr *p_attr);
+void				return_message(char *str, t_philo *attr, int id);
 
 // philo_utils.c
 int					ft_atoi(const char *str);
