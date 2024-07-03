@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/01 20:16:41 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/03 20:37:10 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,11 +25,17 @@
 int create_threads(t_philo_attr *p_attr, t_philo *attr)
 {
 	int i; 
-	// pthread_t		monitor_thread;
+	pthread_t		monitor_thread;
 
 	i = -1;
-	// if (pthread_create(&monitor_thread, NULL, &monitor, (void *)attr) != 0)
-	// 	ft_free(&monitor_thread);
+	monitor_thread = malloc(sizeof(pthread_t)); // FREE THIS
+	if (monitor_thread == NULL)
+	{
+		printf("Malloc failed to allocate memory\n");
+		return (0);
+	}
+	if (pthread_create(&monitor_thread, NULL, &monitor, (void *)attr) != 0)
+		ft_free(&monitor_thread);
 	while (++i < attr->nbr_of_philo)
 	{
 		p_attr[i].philo_id = i + 1;
@@ -37,8 +43,8 @@ int create_threads(t_philo_attr *p_attr, t_philo *attr)
 		if (pthread_create(&attr->p_thread[i], NULL, philo_routine, (void *)&p_attr[i]) != 0)
 			ft_free(attr->p_thread);
 	}
-	// if (pthread_join(monitor_thread, NULL) != 0)
-	// 	ft_free(&monitor_thread);
+	if (pthread_join(monitor_thread, NULL) != 0)
+		ft_free(&monitor_thread);
 	i = -1;
 	while (++i < attr->nbr_of_philo)
 	{ 
@@ -55,9 +61,9 @@ void destroy_and_free(t_philo_attr *p_attr)
 	i = -1;
 	while (++i < p_attr->attr->nbr_of_philo)
 		pthread_mutex_destroy(&p_attr->attr->fork_mutexes[i]);
-	pthread_mutex_destroy(&p_attr->death_mutex);
-	pthread_mutex_destroy(&p_attr->write_mutex);
-	pthread_mutex_destroy(&p_attr->meal_mutex);
+	pthread_mutex_destroy(&p_attr->attr->death_mutex);
+	pthread_mutex_destroy(&p_attr->attr->write_mutex);
+	pthread_mutex_destroy(&p_attr->attr->meal_mutex);
 	pthread_mutex_destroy(&p_attr->attr->waiter);
 	free(p_attr->attr->fork_mutexes);
 	free(p_attr->attr->p_thread);
@@ -67,10 +73,10 @@ void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
 {
 	int 		i;
 	
+	i = -1;
 	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
 	if (attr->p_thread == NULL)
 		return (NULL);
-	i = -1;
 	attr->fork_mutexes = malloc(attr->nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
 	if (attr->fork_mutexes == NULL)
 	{
@@ -81,21 +87,15 @@ void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
 		pthread_mutex_init(&attr->fork_mutexes[i], NULL);
 	if(!create_threads(p_attr, attr))
 		return (NULL);
-	i = -1;	
-	while (++i < attr->nbr_of_philo)
-		pthread_mutex_destroy(&attr->fork_mutexes[i]);
 	return (NULL);
 }
 
-void init_program(t_philo_attr *p_attr)
-{
-	pthread_mutex_init(&p_attr->death_mutex, NULL);
-	pthread_mutex_init(&p_attr->write_mutex, NULL);
-	pthread_mutex_init(&p_attr->meal_mutex, NULL);
-	pthread_mutex_init(&p_attr->attr->waiter, NULL);
-}
+// void init_program(t_philo *attr)
+// {
+	
+// }
 
-void init_philos(int ac, int *args, t_philo *ph, t_philo_attr *ph_attr)
+void init_philos(int ac, int *args, t_philo *ph)
 {
 	int i;
 
@@ -108,23 +108,24 @@ void init_philos(int ac, int *args, t_philo *ph, t_philo_attr *ph_attr)
 		ph->nbr_of_meals = args[4];
 	else
 		ph->nbr_of_meals = -1;
-	i = 0;
-	while (++i <= ph->nbr_of_philo)
+	i = -1;
+	while (++i < ph->nbr_of_philo)
 	{
 		ph[i].done_eating = 0;
 		ph[i].meals_eaten = 0;
 		ph[i].is_dead = 1;
 		ph[i].last_meal = get_time_now();
-		ph[i].death_mutex = &ph_attr->death_mutex;
-		ph[i].write_mutex = &ph_attr->write_mutex;
-		ph[i].meal_mutex = &ph_attr->meal_mutex;
 	}
+	pthread_mutex_init(&ph->death_mutex, NULL);
+	pthread_mutex_init(&ph->write_mutex, NULL);
+	pthread_mutex_init(&ph->meal_mutex, NULL);
+	pthread_mutex_init(&ph->waiter, NULL);
 }
 
 int	main(int ac, char **av)
 {
-	t_philo			attr;
-	t_philo_attr	p_attr;
+	t_philo			attr[NUM_PHILOSOPHERS];
+	t_philo_attr	p_attr[NUM_PHILOSOPHERS];
 	int				args[ac - 1];
 
 	if (ac < 5 || ac > 6)
@@ -134,13 +135,28 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
-	init_program(&p_attr);
-	init_philos(ac, args, &attr, &p_attr);
-	fork_mutexes(&attr, &p_attr);
-	destroy_and_free(&p_attr);
+	// init_program(&attr);
+	init_philos(ac, args, attr);
+	fork_mutexes(attr, p_attr);
+	destroy_and_free(p_attr);
 	return (0);
 }
 
-// print arguments value
-// for(int x = 0; x < ac - 1; x++)
-//     printf("val = %i\n", args[x]);
+// int	main(int ac, char **av)
+// {
+// 	t_philo			attr;
+// 	t_philo_attr	p_attr[NUM_PHILOSOPHERS];
+// 	int				args[ac - 1];
+
+// 	if (ac < 5 || ac > 6)
+// 	{
+// 		fprintf(stderr, "Invalid number of arguments\n");
+// 		return (1);
+// 	}
+// 	if (!args_handling(ac, av, args))
+// 		err_message(2);
+// 	// init_program(&attr);
+// 	init_philos(ac, args, &attr);
+// 	fork_mutexes(&attr, p_attr);
+// 	return (0);
+// }

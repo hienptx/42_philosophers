@@ -6,7 +6,7 @@
 #    By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/19 16:32:40 by hipham            #+#    #+#              #
-#    Updated: 2024/07/01 16:25:28 by hipham           ###   ########.fr        #
+#    Updated: 2024/07/03 14:21:01 by hipham           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,7 +27,7 @@ all: $(NAME)
 
 $(NAME): $(OBJS)
 	@echo "Creating archive: $(NAME)"
-	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LSAN)
 
 clean:
 	rm -f $(OBJS)
