@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/03 18:19:04 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/04 19:40:40 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ typedef struct p_philo
 	pthread_t		*p_thread;
 	pthread_mutex_t	*fork_mutexes;
 	pthread_mutex_t	meal_mutex;
+	pthread_mutex_t	m_mutex;
 	pthread_mutex_t	death_mutex;
 	pthread_mutex_t	write_mutex;
 	pthread_mutex_t	waiter;
@@ -51,6 +52,7 @@ typedef struct p_philo
 typedef struct p_philo_attr
 {
 	int				philo_id;
+	// pthread_t		monitor_thread;
 	t_philo			*attr;
 }					t_philo_attr;
 
@@ -67,7 +69,7 @@ int					str_arg_handling(char *s);
 int				create_threads(t_philo_attr *p_attr, t_philo *attr);
 void				destroy_and_free(t_philo_attr *p_attr);
 void				*fork_mutexes(t_philo *attr, t_philo_attr *p_attr);
-void				init_program(t_philo *p_attr);
+// void				init_program(t_philo *p_attr);
 void	init_philos(int ac, int *args, t_philo *ph);
 // philo_routine.c
 void				*philo_routine(void *agr);
@@ -85,3 +87,4 @@ long				timestamp_ms(t_philo *attr);
 
 // monitor.c
 void				*monitor(void *agr);
+int				check_death(t_philo *attr);

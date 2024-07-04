@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/03 20:37:10 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/04 19:26:31 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,18 +24,14 @@
 
 int create_threads(t_philo_attr *p_attr, t_philo *attr)
 {
-	int i; 
-	pthread_t		monitor_thread;
+	int i;
 
-	i = -1;
-	monitor_thread = malloc(sizeof(pthread_t)); // FREE THIS
-	if (monitor_thread == NULL)
-	{
-		printf("Malloc failed to allocate memory\n");
-		return (0);
-	}
-	if (pthread_create(&monitor_thread, NULL, &monitor, (void *)attr) != 0)
-		ft_free(&monitor_thread);
+	i= -1;
+	// if (pthread_create(&p_attr->monitor_thread, NULL, &monitor, (void *)attr) != 0)
+	// {
+	// 	printf("Failed to create thread");
+	// 	ft_free(p_attr->monitor_thread);
+	// }
 	while (++i < attr->nbr_of_philo)
 	{
 		p_attr[i].philo_id = i + 1;
@@ -43,9 +39,12 @@ int create_threads(t_philo_attr *p_attr, t_philo *attr)
 		if (pthread_create(&attr->p_thread[i], NULL, philo_routine, (void *)&p_attr[i]) != 0)
 			ft_free(attr->p_thread);
 	}
-	if (pthread_join(monitor_thread, NULL) != 0)
-		ft_free(&monitor_thread);
 	i = -1;
+	// if (pthread_join(p_attr->monitor_thread, NULL) != 0)
+	// {
+	// 	printf("Failed to create thread");
+	// 	ft_free(p_attr->monitor_thread);
+	// }
 	while (++i < attr->nbr_of_philo)
 	{ 
 		if (pthread_join(attr->p_thread[i], NULL) != 0)
@@ -54,46 +53,36 @@ int create_threads(t_philo_attr *p_attr, t_philo *attr)
 	return (1);
 }
 
-void destroy_and_free(t_philo_attr *p_attr)
-{
-	int i;
-
-	i = -1;
-	while (++i < p_attr->attr->nbr_of_philo)
-		pthread_mutex_destroy(&p_attr->attr->fork_mutexes[i]);
-	pthread_mutex_destroy(&p_attr->attr->death_mutex);
-	pthread_mutex_destroy(&p_attr->attr->write_mutex);
-	pthread_mutex_destroy(&p_attr->attr->meal_mutex);
-	pthread_mutex_destroy(&p_attr->attr->waiter);
-	free(p_attr->attr->fork_mutexes);
-	free(p_attr->attr->p_thread);
-}
-
 void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
 {
 	int 		i;
-	
-	i = -1;
+
+	// p_attr->monitor_thread = malloc(sizeof(pthread_t)); // FREE THIS
+	// if (p_attr->monitor_thread == NULL)
+	// {
+	// 	printf("Malloc failed to allocate memory\n");
+	// 	return (0);
+	// }
 	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
 	if (attr->p_thread == NULL)
-		return (NULL);
+	{
+		printf("Malloc failed to allocate memory\n");
+		// free(p_attr->monitor_thread);
+		return (0);
+	}
 	attr->fork_mutexes = malloc(attr->nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
 	if (attr->fork_mutexes == NULL)
 	{
 		free(attr->p_thread);
 		return(NULL);
 	}
+	i = -1;
 	while (++i < attr->nbr_of_philo)
 		pthread_mutex_init(&attr->fork_mutexes[i], NULL);
 	if(!create_threads(p_attr, attr))
 		return (NULL);
 	return (NULL);
 }
-
-// void init_program(t_philo *attr)
-// {
-	
-// }
 
 void init_philos(int ac, int *args, t_philo *ph)
 {
@@ -135,7 +124,6 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
-	// init_program(&attr);
 	init_philos(ac, args, attr);
 	fork_mutexes(attr, p_attr);
 	destroy_and_free(p_attr);
