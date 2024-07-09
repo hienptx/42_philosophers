@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/04 19:26:31 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/05 20:20:57 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,99 +22,86 @@
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
 
-int create_threads(t_philo_attr *p_attr, t_philo *attr)
+int create_threads(t_philo *ph, int nbr_of_philos)
 {
 	int i;
 
 	i= -1;
-	// if (pthread_create(&p_attr->monitor_thread, NULL, &monitor, (void *)attr) != 0)
-	// {
-	// 	printf("Failed to create thread");
-	// 	ft_free(p_attr->monitor_thread);
-	// }
-	while (++i < attr->nbr_of_philo)
+	while (++i < nbr_of_philos)
 	{
-		p_attr[i].philo_id = i + 1;
-		p_attr[i].attr = attr;
-		if (pthread_create(&attr->p_thread[i], NULL, philo_routine, (void *)&p_attr[i]) != 0)
-			ft_free(attr->p_thread);
+		if (pthread_create(&ph[i].p_thread, NULL, philo_routine, (void *)&ph[i]) != 0)
+		{
+			printf("Failed to create philos' threads\n");
+			ft_free(ph->p_thread);
+		}
+	}
+	if (pthread_create(&ph->monitor, NULL, &monitor, (void *)ph) != 0)
+	{
+		printf("Failed to create monitor's thread\n");
+		ft_free(ph->monitor);
 	}
 	i = -1;
-	// if (pthread_join(p_attr->monitor_thread, NULL) != 0)
-	// {
-	// 	printf("Failed to create thread");
-	// 	ft_free(p_attr->monitor_thread);
-	// }
-	while (++i < attr->nbr_of_philo)
+	while (++i < nbr_of_philos)
 	{ 
-		if (pthread_join(attr->p_thread[i], NULL) != 0)
-			ft_free(attr->p_thread);
+		if (pthread_join(ph[i].p_thread, NULL) != 0)
+		{
+			printf("Failed to join philos' threads\n");
+			ft_free(ph->monitor);
+			ft_free(ph->p_thread);
+		}
+	}
+	if (pthread_join(ph->monitor, NULL) != 0)
+	{
+		printf("Failed to create monitor's thread\n");
+		ft_free(ph->monitor);
+		ft_free(ph->p_thread);
 	}
 	return (1);
 }
 
-void	*fork_mutexes(t_philo *attr, t_philo_attr *p_attr)
+void	*fork_mutexes(t_philo *attr)
 {
 	int 		i;
 
-	// p_attr->monitor_thread = malloc(sizeof(pthread_t)); // FREE THIS
-	// if (p_attr->monitor_thread == NULL)
-	// {
-	// 	printf("Malloc failed to allocate memory\n");
-	// 	return (0);
-	// }
-	attr->p_thread = malloc(attr->nbr_of_philo * sizeof(pthread_t)); //FREE
-	if (attr->p_thread == NULL)
-	{
-		printf("Malloc failed to allocate memory\n");
-		// free(p_attr->monitor_thread);
-		return (0);
-	}
-	attr->fork_mutexes = malloc(attr->nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
+	attr->fork_mutexes = malloc(attr->itable.nbr_of_philo * sizeof(pthread_mutex_t)); // FREE
 	if (attr->fork_mutexes == NULL)
 	{
-		free(attr->p_thread);
+		printf("Failed to allocate maloc\n");
 		return(NULL);
 	}
 	i = -1;
-	while (++i < attr->nbr_of_philo)
-		pthread_mutex_init(&attr->fork_mutexes[i], NULL);
-	if(!create_threads(p_attr, attr))
-		return (NULL);
+	while (++i < attr->itable.nbr_of_philo)
+	{
+		if (pthread_mutex_init(&attr->fork_mutexes[i], NULL) != 0)
+		{
+			printf("Failed to init fork's mutexes\n");
+			free(attr->fork_mutexes);
+		}
+	}
 	return (NULL);
 }
 
-void init_philos(int ac, int *args, t_philo *ph)
-{
-	int i;
-
-	ph->nbr_of_philo = args[0];
-	ph->time_to_die = args[1];
-	ph->time_to_eat = args[2];
-	ph->time_to_sleep = args[3];
-	ph->start = get_time_now();
-	if (ac == 6)
-		ph->nbr_of_meals = args[4];
-	else
-		ph->nbr_of_meals = -1;
-	i = -1;
-	while (++i < ph->nbr_of_philo)
-	{
-		ph[i].done_eating = 0;
-		ph[i].meals_eaten = 0;
-		ph[i].is_dead = 1;
-		ph[i].last_meal = get_time_now();
-	}
-	pthread_mutex_init(&ph->death_mutex, NULL);
-	pthread_mutex_init(&ph->write_mutex, NULL);
-	pthread_mutex_init(&ph->meal_mutex, NULL);
-	pthread_mutex_init(&ph->waiter, NULL);
-}
+// void allocate_threads(pthread_t monitor, pthread_t *philo, int nbr_of_philo)
+// {
+// 	monitor = malloc(sizeof(pthread_t)); // FREE THIS
+// 	if (monitor == NULL)
+// 	{
+// 		printf("Malloc failed to allocate memory for monitor\n");
+// 		return (NULL);
+// 	}
+// 	philo = malloc(nbr_of_philo * sizeof(pthread_t)); //FREE
+// 	if (philo == NULL)
+// 	{
+// 		printf("Malloc failed to allocate memory for philo\n");
+// 		free(monitor);
+// 		return (NULL);
+// 	}
+// }
 
 int	main(int ac, char **av)
 {
 	t_philo			attr[NUM_PHILOSOPHERS];
-	t_philo_attr	p_attr[NUM_PHILOSOPHERS];
+	// t_philo_mtx		p_attr[NUM_PHILOSOPHERS];
 	int				args[ac - 1];
 
 	if (ac < 5 || ac > 6)
@@ -124,9 +111,14 @@ int	main(int ac, char **av)
 	}
 	if (!args_handling(ac, av, args))
 		err_message(2);
-	init_philos(ac, args, attr);
-	fork_mutexes(attr, p_attr);
-	destroy_and_free(p_attr);
+	get_philo_info(attr, args, ac);
+	init_philos(attr);
+	init_mutexes(attr->mtx);
+	// allocate_threads(attr->monitor, attr->p_thread, attr->itable->nbr_of_philo);
+	fork_mutexes(attr);
+	if(!create_threads(attr, attr->itable.nbr_of_philo))
+		return (0);
+	destroy_and_free(attr);
 	return (0);
 }
 

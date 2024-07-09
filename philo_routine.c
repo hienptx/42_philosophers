@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 15:11:36 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/04 19:41:46 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/05 20:23:07 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,96 +23,82 @@
 // 	return (is_dead);
 // }
 
-int	check_death(t_philo *attr)
-{
-	long	time_since_last_meal;
-	int		i;
-
-	i = -1;
-	while (++i < attr->nbr_of_philo)
-	{
-		pthread_mutex_lock(&attr->death_mutex);
-		time_since_last_meal = get_time_now() - attr[i].last_meal;
-		if (time_since_last_meal > attr->time_to_die
-			&& attr[i].done_eating == 0)
-		{
-			attr[i].is_dead = 0;
-			return_message("has die\n", attr, i + 1);
-			pthread_mutex_unlock(&attr->death_mutex);
-			return 1;
-		}
-		pthread_mutex_unlock(&attr->death_mutex);
-	}
-	return 0;
-}
-
-void destroy_and_free(t_philo_attr *p_attr)
+void destroy_and_free(t_philo *ph)
 {
 	int i;
 
 	i = -1;
-	while (++i < p_attr->attr->nbr_of_philo)
-		pthread_mutex_destroy(&p_attr->attr->fork_mutexes[i]);
-	pthread_mutex_destroy(&p_attr->attr->death_mutex);
-	pthread_mutex_destroy(&p_attr->attr->write_mutex);
-	pthread_mutex_destroy(&p_attr->attr->meal_mutex);
-	pthread_mutex_destroy(&p_attr->attr->waiter);
-	free(p_attr->attr->fork_mutexes);
-	free(p_attr->attr->p_thread);
-	// free(p_attr->monitor_thread);
+	while (++i < ph->itable.nbr_of_philo)
+		pthread_mutex_destroy(&ph->fork_mutexes[i]);
+	pthread_mutex_destroy(&ph->mtx.death_mutex);
+	pthread_mutex_destroy(&ph->mtx.write_mutex);
+	pthread_mutex_destroy(&ph->mtx.meal_mutex);
+	pthread_mutex_destroy(&ph->mtx.waiter);
+	free(ph->fork_mutexes);
+	free(ph->p_thread);
+	free(ph->monitor);
 }
 
-void	return_message(char *str, t_philo *attr, int id)
+void	return_message(char *str, t_philo *attr)
 {
-	pthread_mutex_lock(&attr->write_mutex);
-	printf("%li %i %s", timestamp_ms(attr), id, str);
-	pthread_mutex_unlock(&attr->write_mutex);
+	pthread_mutex_lock(&attr->mtx.write_mutex);
+	printf("%li %i %s", timestamp_ms(attr), attr->philo_id, str);
+	pthread_mutex_unlock(&attr->mtx.write_mutex);
 }
 
-void	eat(t_philo *attr, int id)
+void	eat(t_philo *ph)
 {
 	int	left;
 	int	right;
 
-	left = id - 1;
-	right = id % attr->nbr_of_philo;
+	left = ph->philo_id - 1;
+	right = ph->philo_id % ph->itable.nbr_of_philo;
 
-	pthread_mutex_lock(&attr->waiter);
-	pthread_mutex_lock(&attr->fork_mutexes[left]);
-	return_message(GREEN" has taken l-fork\n"QUIT_COLOR, attr, id);
-	pthread_mutex_lock(&attr->fork_mutexes[right]);
-	return_message(GREEN"has taken r-fork\n"QUIT_COLOR, attr, id);
-	pthread_mutex_unlock(&attr->waiter);
-	return_message(CYAN"is eating\n"QUIT_COLOR, attr, id);
-	usleep(attr->time_to_eat * 1000);
-	pthread_mutex_lock(&attr->meal_mutex);
-	attr[id - 1].last_meal = get_time_now();
-	attr[id - 1].done_eating = 1;
-	attr[id - 1].meals_eaten++;
-	pthread_mutex_unlock(&attr->meal_mutex);
-	pthread_mutex_unlock(&attr->fork_mutexes[right]);
-	pthread_mutex_unlock(&attr->fork_mutexes[left]);
+	if (ph->philo_id % 2 == 0)
+		usleep(500);
+
+	pthread_mutex_lock(&ph->mtx.waiter);
+	
+	pthread_mutex_lock(&ph->fork_mutexes[left]);
+	return_message(GREEN" has taken l-fork\n"QUIT_COLOR, ph);
+	pthread_mutex_lock(&ph->fork_mutexes[right]);
+	return_message(GREEN"has taken r-fork\n"QUIT_COLOR, ph);
+	
+	pthread_mutex_unlock(&ph->mtx.waiter);
+
+	return_message(CYAN"is eating\n"QUIT_COLOR, ph);
+	usleep(ph->itable.time_to_eat * 1000);
+	
+	pthread_mutex_lock(&ph->mtx.meal_mutex);
+	ph[ph->philo_id - 1].last_meal = get_time_now();
+	ph[ph->philo_id - 1].done_eating = 1;
+	ph[ph->philo_id - 1].meals_eaten++;
+	pthread_mutex_unlock(&ph->mtx.meal_mutex);
+	
+	// check_death(ph);
+	pthread_mutex_unlock(&ph->fork_mutexes[right]);
+	pthread_mutex_unlock(&ph->fork_mutexes[left]);
 }
 
 void	*philo_routine(void *arg)
 {
-	t_philo_attr	*p_attr;
+	t_philo	*ph;
 
-	p_attr = (t_philo_attr *)arg;
+	ph = (t_philo *)arg;
 	while (1)
 	{
-		if (p_attr->attr->nbr_of_meals != -1)
+		if (ph->itable.nbr_of_meals != -1)
 		{
-			if (p_attr->attr[p_attr->philo_id - 1].meals_eaten >= p_attr->attr->nbr_of_meals)
+			if (ph[ph->philo_id - 1].meals_eaten >= ph->itable.nbr_of_meals)
 				break ;
 		}
-		eat(p_attr->attr, p_attr->philo_id);
-		return_message(RED"is sleeping\n"QUIT_COLOR, p_attr->attr, p_attr->philo_id);
-		usleep(p_attr->attr->time_to_sleep * 1000);
-		return_message(PURPLE"is thinking\n"QUIT_COLOR, p_attr->attr, p_attr->philo_id);
-		if (check_death(p_attr->attr) && p_attr->attr[p_attr->philo_id - 1].is_dead == 0)
-			break ;
+		eat(ph);
+		return_message(RED"is sleeping\n"QUIT_COLOR, ph);
+		usleep(ph->itable.time_to_sleep * 1000);
+		return_message(PURPLE"is thinking\n"QUIT_COLOR, ph);
+		// if (check_death(p_attr->attr) && p_attr->attr[p_attr->philo_id - 1].is_dead == 0)
+		// 	break ;
 	}
-	// printf("philo[%i] have eaten %i meals\n", p_attr->philo_id, p_attr->attr[p_attr->philo_id - 1].meals_eaten);
+	// printf("philo[%i] have eaten %i meals\n", attr->philo_id, attr[attr->philo_id - 1].meals_eaten);
 	return (arg);
 }

@@ -42,31 +42,53 @@
 // 	int		i;
 
 // 	i = -1;
-// 	while (++i < attr->nbr_of_philo)
+// 	while (++i < attr->itable->nbr_of_philo)
 // 	{
-// 		pthread_mutex_lock(&attr->death_mutex);
+// 		pthread_mutex_lock(&attr->mtx->death_mutex);
 // 		time_since_last_meal = get_time_now() - attr[i].last_meal;
-// 		if (time_since_last_meal > attr->time_to_die
+// 		printf("time since last meal in eat loop = %li\n",
+// 			time_since_last_meal);
+// 		if (time_since_last_meal > attr->itable->time_to_die
 // 			&& attr[i].done_eating == 0)
 // 		{
 // 			attr[i].is_dead = 0;
 // 			return_message("has die\n", attr, i + 1);
-// 			pthread_mutex_unlock(&attr->death_mutex);
+// 			pthread_mutex_unlock(&attr->mtx->death_mutex);
 // 		}
-// 		pthread_mutex_unlock(&attr->death_mutex);
+// 		pthread_mutex_unlock(&attr->mtx->death_mutex);
 // 	}
 // }
 
-// void	*monitor(void *agr)
-// {
-// 	t_philo	*attr;
-// 	// int		i;
+void	*monitor(void *agr)
+{
+	t_philo	*ph;
+	long	time_since_last_meal;
+	int		i;
 
-// 	attr = (t_philo *)agr;
-// 	while (1)
-// 	{
-// 		if (check_death(attr))
-// 			break ;
-// 	}
-// 	return (NULL);
-// }
+	ph = (t_philo *)agr;
+	i = -1;
+	while (1)
+	{
+		while (++i < ph->itable.nbr_of_philo)
+		{
+			pthread_mutex_lock(&ph->mtx.death_mutex);
+			time_since_last_meal = get_time_now() - ph[i].last_meal;
+			printf("time since last meal in monitor = %li\n",
+				time_since_last_meal);
+			printf("done eating = %i\n", ph[i].done_eating);
+			printf("meal eaten = %i\n", ph[i].meals_eaten);
+			pthread_mutex_unlock(&ph->mtx.death_mutex);
+			if (time_since_last_meal > ph->itable.time_to_die
+				&& ph[i].done_eating == 0)
+			{
+				ph[i].is_dead = 0;
+				return_message("has die\n", ph);
+				// pthread_mutex_unlock(&ph->death_mutex);
+				break ;
+			}
+		}
+		if (ph[i].is_dead == 0)
+			break ;
+	}
+	return (NULL);
+}
