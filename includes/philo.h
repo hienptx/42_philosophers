@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/05 20:20:43 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/10 20:02:51 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <unistd.h>
-
-#define NUM_PHILOSOPHERS 250
 
 #define BLACK "\033[0;30m"
 #define RED "\033[0;31m"
@@ -28,40 +26,33 @@
 #define WHITE "\033[0;37m"
 #define QUIT_COLOR "\033[0m"
 
-typedef struct p_philo_info
+typedef struct s_philo_attr
 {
-	int				nbr_of_philo;
-	long			time_to_die;
-	long			time_to_sleep;
-	long			time_to_eat;
-	int				nbr_of_meals;
-
-}					t_philo_info;
-
-typedef struct p_philo_attr
-{
-	pthread_mutex_t	meal_mutex;
+	pthread_t		monitor_thread;
+	pthread_mutex_t	*fork_mutexes;
 	pthread_mutex_t	death_mutex;
 	pthread_mutex_t	write_mutex;
-	pthread_mutex_t	waiter;
-}					t_philo_mtx;
+	pthread_mutex_t	meal_mutex;
+	int				nbr_of_philo;
+	int				time_to_die;
+	int				time_to_eat;
+	int				time_to_sleep;
+	int				nbr_of_meals;
+	int				stop_status;
+	long			start;
+	struct s_philo	*attr;
+}					t_philo_attr;
 
-typedef struct p_philo
+typedef struct s_philo
 {
 	int				philo_id;
 	int				done_eating;
 	int				meals_eaten;
-	int				is_dead;
-	long			start;
+	int				*is_dead;
 	long			last_meal;
 	pthread_t		p_thread;
-	pthread_t		monitor;
-	pthread_mutex_t	*fork_mutexes;
-	t_philo_info	itable;
-	t_philo_mtx		mtx;
-
+	t_philo_attr	*shared_attr;
 }					t_philo;
-
 
 // agrs_handling.c
 int					args_handling(int ac, char **av, int *args);
@@ -71,27 +62,25 @@ int					ft_isspace(int c);
 int					ft_isdigit(int x);
 
 // philo.c
-void allocate_threads(pthread_t monitor, pthread_t *philo, int nbr_of_philo);
-void	*fork_mutexes(t_philo *attr);
-int create_threads(t_philo *ph, int nbr_of_philos);
-
+int					create_threads(t_philo_attr *p_attr);
+void				*philo_routine(void *arg);
+void				destroy_and_free(t_philo_attr *p_attr);
+int					check_simulation_status(t_philo_attr *ptr);
 // philo_routine.c
-void	*philo_routine(void *arg);
-void	eat(t_philo *ph);
-void	return_message(char *str, t_philo *attr);
-void destroy_and_free(t_philo *ph);
+void				eating(t_philo *attr, int left, int right, int id);
+void				thinking(t_philo *philo, int id);
+void				sleeping(t_philo *philo, int id);
+void				return_message(char *str, t_philo_attr *attr, int id);
 
 // philo_utils.c
-void	err_message(int err);
-int ft_free(void *ptr);
-long	get_time_now();
-long	timestamp_ms(t_philo *attr);
+int					err_message(char *str, int err);
+int					ft_free(void *ptr);
+long				get_time_now(void);
 
 // monitor.c
-void	*monitor(void *agr);
-void	check_death(t_philo *attr);
+void				*monitor(void *arg);
 
-//init.c
-void get_philo_info(t_philo *ph, int *args, int ac);
-void init_philos(t_philo *ph);
-void init_mutexes(t_philo_mtx ph);
+// init.c
+int					init_mutexes(t_philo_attr *p_attr);
+void				init_shared_data(int ac, int *args, t_philo_attr *ptr);
+void				init_philo(t_philo_attr *ptr);

@@ -101,10 +101,8 @@ void	eat(t_philo *attr, int left, int right, int id)
 	pthread_mutex_lock(&attr->shared_attr->fork_mutexes[left]);
 	return_message(GREEN " has taken right fork\n" QUIT_COLOR, attr->shared_attr,
 		id);
-	// printf("fork[%i]\n", right);
 	return_message(GREEN " has taken left fork\n" QUIT_COLOR, attr->shared_attr,
 		id);
-	// printf("fork[%i]\n", left);
 	attr->done_eating = 1;
 	return_message(CYAN " is eating\n" QUIT_COLOR, attr->shared_attr, id);
 	pthread_mutex_lock(&attr->shared_attr->meal_mutex);
@@ -206,6 +204,11 @@ int	create_threads(t_philo_attr *p_attr)
 			return (-1);
 		}
 	}
+	if (pthread_join(p_attr->monitor_thread, NULL) != 0)
+	{
+		printf("Failed to join monitor thread\n");
+		return (-1);
+	}
 	for (i = 0; i < p_attr->nbr_of_philo; ++i)
 	{
 		if (pthread_join(p_attr->attr[i].p_thread, NULL) != 0)
@@ -213,11 +216,6 @@ int	create_threads(t_philo_attr *p_attr)
 			printf("Failed to join philosopher thread %d\n", i + 1);
 			return (-1);
 		}
-	}
-	if (pthread_join(p_attr->monitor_thread, NULL) != 0)
-	{
-		printf("Failed to join monitor thread\n");
-		return (-1);
 	}
 	return (0);
 }
@@ -276,15 +274,6 @@ void	init_shared_data(int ac, int *args, t_philo_attr *ptr)
 	pthread_mutex_init(&ptr->death_mutex, NULL);
 	pthread_mutex_init(&ptr->write_mutex, NULL);
 	pthread_mutex_init(&ptr->meal_mutex, NULL);
-}
-
-int	args_handling(int ac, char **av, int *args)
-{
-	for (int i = 1; i < ac; i++)
-	{
-		args[i - 1] = atoi(av[i]);
-	}
-	return (1);
 }
 
 int	main(int ac, char **av)

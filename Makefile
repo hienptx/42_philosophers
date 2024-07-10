@@ -6,7 +6,7 @@
 #    By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/19 16:32:40 by hipham            #+#    #+#              #
-#    Updated: 2024/07/09 20:23:42 by hipham           ###   ########.fr        #
+#    Updated: 2024/07/10 19:04:45 by hipham           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,8 +17,7 @@ CFLAGS = -Wall -Wextra -Werror -I./includes -pthread
 LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
 LSAN = -fsanitize=thread -g
 
-SRCS = test_1.c 
-# philo.c args_handling.c philo_utils.c philo_routine.c monitor.c init.c
+SRCS = philo.c args_handling.c philo_utils.c philo_routine.c monitor.c init.c
 OBJS = $(SRCS:.c=.o)
 
 %.o: %.c
