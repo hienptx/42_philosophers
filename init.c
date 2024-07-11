@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 18:15:53 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/10 19:21:51 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/11 15:48:40 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ void	init_philo(t_philo_attr *ptr)
 		printf("Failed to allocate memory for philosophers\n");
 		return ;
 	}
-	for (i = 0; i < ptr->nbr_of_philo; ++i)
+	i = -1;
+	while (++i < ptr->nbr_of_philo)
 	{
 		ptr->attr[i].philo_id = i + 1;
 		ptr->attr[i].done_eating = 0;
@@ -41,7 +42,10 @@ void	init_shared_data(int ac, int *args, t_philo_attr *ptr)
 	ptr->time_to_eat = args[2];
 	ptr->time_to_sleep = args[3];
 	ptr->start = get_time_now();
-	ptr->nbr_of_meals = (ac == 6) ? args[4] : -1;
+	if (ac == 6)
+		ptr->nbr_of_meals = args[4];
+	else
+		ptr->nbr_of_meals = -1;
 }
 
 int	init_mutexes(t_philo_attr *p_attr)
@@ -52,7 +56,8 @@ int	init_mutexes(t_philo_attr *p_attr)
 			* sizeof(pthread_mutex_t));
 	if (p_attr->fork_mutexes == NULL)
 		err_message("Failed to allocate memory for fork mutexes\n", -1);
-	for (i = 0; i < p_attr->nbr_of_philo; ++i)
+	i = -1;
+	while (++i < p_attr->nbr_of_philo)
 	{
 		if (pthread_mutex_init(&p_attr->fork_mutexes[i], NULL) != 0)
 			err_message("Failed to init forks' mutexes\n", -1);

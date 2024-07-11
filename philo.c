@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/10 20:02:42 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/11 19:48:37 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,19 @@
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
 
-void	destroy_and_free(t_philo_attr *p_attr)
+void	destroy_and_free(t_philo_attr *p_attr, int *args)
 {
 	int	i;
 
-	for (i = 0; i < p_attr->nbr_of_philo; ++i)
+	i = -1;
+	while (++i < p_attr->nbr_of_philo)
 		pthread_mutex_destroy(&p_attr->fork_mutexes[i]);
 	pthread_mutex_destroy(&p_attr->death_mutex);
 	pthread_mutex_destroy(&p_attr->write_mutex);
 	pthread_mutex_destroy(&p_attr->meal_mutex);
 	free(p_attr->fork_mutexes);
 	free(p_attr->attr);
+	free(args);
 }
 
 int	check_simulation_status(t_philo_attr *ptr)
@@ -48,19 +50,26 @@ int	check_simulation_status(t_philo_attr *ptr)
 void	*philo_routine(void *arg)
 {
 	t_philo	*philo;
-	int	left;
-	int	right;
+	int		left;
+	int		right;
 
 	philo = (t_philo *)arg;
-    right = philo->philo_id - 1;
-    left = philo->philo_id % philo->shared_attr->nbr_of_philo;
+	right = philo->philo_id - 1;
+	left = philo->philo_id % philo->shared_attr->nbr_of_philo;
 	if (philo->philo_id % 2 == 0)
 		usleep(500);
 	while (check_simulation_status(philo->shared_attr))
 	{
+		// if (philo->philo_id % 2 == 0)
+		// 	usleep(philo->shared_attr->time_to_sleep);
+		if (philo->shared_attr->nbr_of_philo == 1)
+		{
+			usleep(philo->shared_attr->time_to_die * 1000);
+			return (NULL);
+		}
 		eating(philo, left, right, philo->philo_id);
 		sleeping(philo, philo->philo_id);
-		thinking(philo, philo->philo_id);
+		// thinking(philo, philo->philo_id);
 	}
 	return (NULL);
 }
@@ -69,17 +78,19 @@ int	create_threads(t_philo_attr *p_attr)
 {
 	int	i;
 
-	// if (pthread_create(&p_attr->monitor_thread, NULL, &monitor, p_attr) != 0)
-	// 	err_message("Failed to create monitor thread\n", -1);
-	for (i = 0; i < p_attr->nbr_of_philo; ++i)
+	if (pthread_create(&p_attr->monitor_thread, NULL, &monitor, p_attr) != 0)
+		err_message("Failed to create monitor thread\n", -1);
+	i = -1;
+	while (++i < p_attr->nbr_of_philo)
 	{
 		if (pthread_create(&p_attr->attr[i].p_thread, NULL, philo_routine,
 				&p_attr->attr[i]) != 0)
 			err_message("Failed to create philosopher thread\n", -1);
 	}
-	// if (pthread_join(p_attr->monitor_thread, NULL) != 0)
-	// 	err_message("Failed to join monitor thread\n", -1);
-	for (i = 0; i < p_attr->nbr_of_philo; ++i)
+	if (pthread_join(p_attr->monitor_thread, NULL) != 0)
+		err_message("Failed to join monitor thread\n", -1);
+	i = -1;
+	while (++i < p_attr->nbr_of_philo)
 	{
 		if (pthread_join(p_attr->attr[i].p_thread, NULL) != 0)
 			err_message("Failed to join philosopher thread\n", -1);
@@ -89,25 +100,29 @@ int	create_threads(t_philo_attr *p_attr)
 
 int	main(int ac, char **av)
 {
-	t_philo_attr p_attr;
-	int args[ac - 1];
+	t_philo_attr	p_attr;
+	int				*args;
 
 	if (ac < 5 || ac > 6)
 		err_message("Error: In valid number of arguments\n", 1);
+	args = malloc ((ac -1 ) * sizeof(int));
+	if (args == NULL)
+		err_message("Failed to allocate int array\n", 1);
 	if (!args_handling(ac, av, args))
 		err_message("Error: Invalid arguments\n", 1);
 	init_shared_data(ac, args, &p_attr);
 	init_philo(&p_attr);
 	if (init_mutexes(&p_attr) != 0)
 	{
+		free(args);
 		free(p_attr.attr);
 		err_message("Failed to create forks mutexes\n", 1);
 	}
 	if (create_threads(&p_attr) != 0)
 	{
-		destroy_and_free(&p_attr);
+		destroy_and_free(&p_attr, args);
 		err_message("Failed to create threads\n", 1);
 	}
-	destroy_and_free(&p_attr);
-	return 0;
+	destroy_and_free(&p_attr, args);
+	return (0);
 }

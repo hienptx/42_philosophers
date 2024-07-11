@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/10 20:02:51 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/11 19:24:10 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ int					ft_isdigit(int x);
 // philo.c
 int					create_threads(t_philo_attr *p_attr);
 void				*philo_routine(void *arg);
-void				destroy_and_free(t_philo_attr *p_attr);
+void				destroy_and_free(t_philo_attr *p_attr, int *args);
 int					check_simulation_status(t_philo_attr *ptr);
 // philo_routine.c
 void				eating(t_philo *attr, int left, int right, int id);
@@ -76,9 +76,14 @@ void				return_message(char *str, t_philo_attr *attr, int id);
 int					err_message(char *str, int err);
 int					ft_free(void *ptr);
 long				get_time_now(void);
+// void	ft_putstr_fd(char *s, int fd);
+// void	ft_putnbr_fd(int n, int fd);
+// void	ft_putchar_fd(char c, int fd);
 
 // monitor.c
 void				*monitor(void *arg);
+int					check_death(t_philo_attr *attr);
+int					check_all_ate(t_philo_attr *attr);
 
 // init.c
 int					init_mutexes(t_philo_attr *p_attr);
