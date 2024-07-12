@@ -6,14 +6,14 @@
 #    By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/19 16:32:40 by hipham            #+#    #+#              #
-#    Updated: 2024/07/11 19:48:54 by hipham           ###   ########.fr        #
+#    Updated: 2024/07/12 18:54:01 by hipham           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = philo
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -I./includes -pthread -O3
+CFLAGS = -Wall -Wextra -Werror -I./includes -pthread
 LEAKS = -L../LeakSanitizer -llsan -lc++ -Wno-gnu-include-next -I ../LeakSanitize
 LSAN = -fsanitize=thread -g
 

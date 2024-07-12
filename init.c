@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/05 18:15:53 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/11 15:48:40 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/12 18:57:47 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ void	init_shared_data(int ac, int *args, t_philo_attr *ptr)
 	ptr->time_to_eat = args[2];
 	ptr->time_to_sleep = args[3];
 	ptr->start = get_time_now();
+	ptr->ready_to_start = 0;
 	if (ac == 6)
 		ptr->nbr_of_meals = args[4];
 	else

@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:15 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/11 19:24:20 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/12 18:26:20 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,15 @@ long	get_time_now(void)
 	gettimeofday(&tv, NULL);
 	ms = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 	return (ms);
+}
+
+int ft_usleep(long milliseconds)
+{
+    long  start;
+    start = get_time_now();
+    while ((get_time_now() - start) < milliseconds)
+        usleep(500);
+    return (0);
 }
 
 // void	ft_putstr_fd(char *s, int fd)
