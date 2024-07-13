@@ -65,12 +65,14 @@ int						ft_isdigit(int x);
 // philo.c
 int						create_threads(t_philo_attr *p_attr);
 void					*philo_routine(void *arg);
-void					destroy_and_free(t_philo_attr *p_attr, int *args);
 int						check_simulation_status(t_philo_attr *ptr);
+void					simulation_start_point(t_philo_attr *philo);
+
 // philo_routine.c
-void					eating(t_philo *attr, int left, int right, int id);
 void					thinking(t_philo *philo, int id);
+void					eating(t_philo *attr, int left, int right, int id);
 void					sleeping(t_philo *philo, int id);
+void					single_philo(t_philo *attr, int left);
 void					return_message(char *str, t_philo_attr *attr, int id);
 
 // philo_utils.c
@@ -78,14 +80,12 @@ int						err_message(char *str, int err);
 int						ft_free(void *ptr);
 long					get_time_now(void);
 int						ft_usleep(long milliseconds);
-// void	ft_putstr_fd(char *s, int fd);
-// void	ft_putnbr_fd(int n, int fd);
-// void	ft_putchar_fd(char c, int fd);
 
 // monitor.c
 void					*monitor(void *arg);
 int						check_death(t_philo_attr *attr);
 int						check_all_ate(t_philo_attr *attr);
+void					destroy_and_free(t_philo_attr *p_attr, int *args);
 
 // init.c
 int						init_mutexes(t_philo_attr *p_attr);

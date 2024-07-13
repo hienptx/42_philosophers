@@ -22,21 +22,6 @@
 //  to convert to milliseconds. These two values are added together to get
 //  the current timestamp in milliseconds.
 
-void	destroy_and_free(t_philo_attr *p_attr, int *args)
-{
-	int	i;
-
-	i = -1;
-	while (++i < p_attr->nbr_of_philo)
-		pthread_mutex_destroy(&p_attr->fork_mutexes[i]);
-	pthread_mutex_destroy(&p_attr->death_mutex);
-	pthread_mutex_destroy(&p_attr->write_mutex);
-	pthread_mutex_destroy(&p_attr->meal_mutex);
-	free(p_attr->fork_mutexes);
-	free(p_attr->attr);
-	free(args);
-}
-
 int	check_simulation_status(t_philo_attr *ptr)
 {
 	int	status;
@@ -47,15 +32,15 @@ int	check_simulation_status(t_philo_attr *ptr)
 	return (status);
 }
 
-// void simulation_start_time(t_philo_attr *philo)
-// {
-// 	int i;
+void simulation_start_point(t_philo_attr *philo)
+{
+	int i;
 
-// 	philo->start = get_time_now();
-// 	i = -1;
-// 	while (++i < philo->nbr_of_philo)
-// 		philo->attr[i].last_meal = philo->start;
-// }
+	philo->start = get_time_now();
+	i = -1;
+	while (++i < philo->nbr_of_philo)
+		philo->attr[i].last_meal = philo->start;
+}
 
 void	*philo_routine(void *arg)
 {
@@ -66,20 +51,15 @@ void	*philo_routine(void *arg)
 	philo = (t_philo *)arg;
 	right = philo->philo_id - 1;
 	left = philo->philo_id % philo->shared_attr->nbr_of_philo;
-	// while(philo->shared_attr->ready_to_start != 1)
-	// 	usleep(50);
+	while(philo->shared_attr->ready_to_start != 1)
+		usleep(50);
 	if (philo->philo_id % 2 == 0)
 		usleep(200);
 	while (check_simulation_status(philo->shared_attr))
 	{
-		if (philo->shared_attr->nbr_of_philo == 1)
-		{
-			usleep(philo->shared_attr->time_to_die * 1000);
-			return (NULL);
-		}
+		thinking(philo, philo->philo_id);
 		eating(philo, left, right, philo->philo_id);
 		sleeping(philo, philo->philo_id);
-		thinking(philo, philo->philo_id);
 	}
 	return (NULL);
 }
@@ -97,8 +77,8 @@ int	create_threads(t_philo_attr *p_attr)
 				&p_attr->attr[i]) != 0)
 			err_message("Failed to create philosopher thread\n", -1);
 	}
-	// simulation_start_time(p_attr);
-	// p_attr->ready_to_start = 1;
+	simulation_start_point(p_attr);
+	p_attr->ready_to_start = 1;
 	if (pthread_join(p_attr->monitor_thread, NULL) != 0)
 		err_message("Failed to join monitor thread\n", -1);
 	i = -1;

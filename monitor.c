@@ -12,6 +12,21 @@
 
 #include "philo.h"
 
+void	destroy_and_free(t_philo_attr *p_attr, int *args)
+{
+	int	i;
+
+	i = -1;
+	while (++i < p_attr->nbr_of_philo)
+		pthread_mutex_destroy(&p_attr->fork_mutexes[i]);
+	pthread_mutex_destroy(&p_attr->death_mutex);
+	pthread_mutex_destroy(&p_attr->write_mutex);
+	pthread_mutex_destroy(&p_attr->meal_mutex);
+	free(p_attr->fork_mutexes);
+	free(p_attr->attr);
+	free(args);
+}
+
 int	check_all_ate(t_philo_attr *attr)
 {
 	int	all_ate;
