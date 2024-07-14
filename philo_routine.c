@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 15:11:36 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/14 17:08:16 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:30:41 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,8 @@ void	single_philo(t_philo *attr, int left)
 	attr->shared_attr->stop_status = 0;
 	pthread_mutex_unlock(&attr->shared_attr->fork_mutexes[left]);
 }
+
+// Fork debug: printf("philo[%i] - l_fork[%i] - r_fork[%i]\n", id, left, right);
 
 void	eating(t_philo *attr, int left, int right, int id)
 {

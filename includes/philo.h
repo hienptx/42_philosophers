@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/19 16:35:09 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/12 18:53:38 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:18:50 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,6 @@ int						ft_isdigit(int x);
 int						create_threads(t_philo_attr *p_attr);
 void					*philo_routine(void *arg);
 int						check_simulation_status(t_philo_attr *ptr);
-void					simulation_start_point(t_philo_attr *philo);
 
 // philo_routine.c
 void					thinking(t_philo *philo, int id);

@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/14 17:08:06 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:25:28 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,6 @@
 // usleep, gettimeofday
 // pthread_create, pthread_detach, pthread_join, pthread_mutex_init,
 // pthread_mutex_destroy, pthread_mutex_lock, pthread_mutex_unlock
-
-// Convert to Milliseconds: The seconds (tv.tv_sec) are multiplied by 1000
-// to convert to milliseconds. The microseconds (tv.tv_usec) are divided by 1000
-//  to convert to milliseconds. These two values are added together to get
-//  the current timestamp in milliseconds.
 
 int	check_simulation_status(t_philo_attr *ptr)
 {
@@ -32,16 +27,6 @@ int	check_simulation_status(t_philo_attr *ptr)
 	return (status);
 }
 
-void	simulation_start_point(t_philo_attr *philo)
-{
-	int	i;
-
-	philo->start = get_time_now();
-	i = -1;
-	while (++i < philo->nbr_of_philo)
-		philo->attr[i].last_meal = philo->start;
-}
-
 void	*philo_routine(void *arg)
 {
 	t_philo	*philo;
@@ -51,10 +36,8 @@ void	*philo_routine(void *arg)
 	philo = (t_philo *)arg;
 	right = philo->philo_id - 1;
 	left = philo->philo_id % philo->shared_attr->nbr_of_philo;
-	while (philo->shared_attr->ready_to_start != 1)
-		usleep(50);
 	if (philo->philo_id % 2 == 0)
-		usleep(200);
+		usleep(500);
 	while (check_simulation_status(philo->shared_attr))
 	{
 		thinking(philo, philo->philo_id);
@@ -77,8 +60,6 @@ int	create_threads(t_philo_attr *p_attr)
 				&p_attr->attr[i]) != 0)
 			err_message("Failed to create philosopher thread\n", -1);
 	}
-	simulation_start_point(p_attr);
-	p_attr->ready_to_start = 1;
 	if (pthread_join(p_attr->monitor_thread, NULL) != 0)
 		err_message("Failed to join monitor thread\n", -1);
 	i = -1;
@@ -118,3 +99,13 @@ int	main(int ac, char **av)
 	destroy_and_free(&p_attr, args);
 	return (0);
 }
+
+// void	simulation_start_point(t_philo_attr *philo)
+// {
+// 	int	i;
+
+// 	philo->start = get_time_now();
+// 	i = -1;
+// 	while (++i < philo->nbr_of_philo)
+// 		philo->attr[i].last_meal = philo->start;
+// }
