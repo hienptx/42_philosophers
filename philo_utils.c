@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:15 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/12 18:26:20 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:08:30 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,52 +34,12 @@ long	get_time_now(void)
 	return (ms);
 }
 
-int ft_usleep(long milliseconds)
+int	ft_usleep(long milliseconds)
 {
-    long  start;
-    start = get_time_now();
-    while ((get_time_now() - start) < milliseconds)
-        usleep(500);
-    return (0);
+	long	start;
+
+	start = get_time_now();
+	while ((get_time_now() - start) < milliseconds)
+		usleep(500);
+	return (0);
 }
-
-// void	ft_putstr_fd(char *s, int fd)
-// {
-// 	while (*s != '\0')
-// 	{
-// 		write(fd, s, 1);
-// 		s++;
-// 	}
-// }
-
-// void	ft_putchar_fd(char c, int fd)
-// {
-// 	const void	*a;
-
-// 	a = &c;
-// 	write(fd, a, 1);
-// }
-
-// void	ft_putnbr_fd(int n, int fd)
-// {
-// 	if (n == -2147483648)
-// 	{
-// 		write(fd, "-2147483648", 11);
-// 		return ;
-// 	}
-// 	if (n == 0)
-// 	{
-// 		write(fd, "0", 1);
-// 		return ;
-// 	}
-// 	if (n < 0)
-// 	{
-// 		ft_putchar_fd('-', fd);
-// 		n = -n;
-// 	}
-// 	if (n >= 10)
-// 	{
-// 		ft_putnbr_fd(n / 10, fd);
-// 	}
-// 	ft_putchar_fd(n % 10 + '0', fd);
-// }

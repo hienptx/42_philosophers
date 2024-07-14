@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 14:48:04 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/12 18:57:41 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:08:06 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,9 @@ int	check_simulation_status(t_philo_attr *ptr)
 	return (status);
 }
 
-void simulation_start_point(t_philo_attr *philo)
+void	simulation_start_point(t_philo_attr *philo)
 {
-	int i;
+	int	i;
 
 	philo->start = get_time_now();
 	i = -1;
@@ -51,7 +51,7 @@ void	*philo_routine(void *arg)
 	philo = (t_philo *)arg;
 	right = philo->philo_id - 1;
 	left = philo->philo_id % philo->shared_attr->nbr_of_philo;
-	while(philo->shared_attr->ready_to_start != 1)
+	while (philo->shared_attr->ready_to_start != 1)
 		usleep(50);
 	if (philo->philo_id % 2 == 0)
 		usleep(200);
@@ -97,7 +97,7 @@ int	main(int ac, char **av)
 
 	if (ac < 5 || ac > 6)
 		err_message("Error: In valid number of arguments\n", 1);
-	args = malloc ((ac -1 ) * sizeof(int));
+	args = malloc((ac - 1) * sizeof(int));
 	if (args == NULL)
 		err_message("Failed to allocate int array\n", 1);
 	if (!args_handling(ac, av, args))

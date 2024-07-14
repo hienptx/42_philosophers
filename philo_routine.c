@@ -6,7 +6,7 @@
 /*   By: hipham <hipham@student.42heilbronn.de>     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/23 15:11:36 by hipham            #+#    #+#             */
-/*   Updated: 2024/07/12 18:59:55 by hipham           ###   ########.fr       */
+/*   Updated: 2024/07/14 17:08:16 by hipham           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,11 +28,10 @@ void	sleeping(t_philo *philo, int id)
 
 void	thinking(t_philo *philo, int id)
 {
-	return_message(PURPLE " is thinking\n" QUIT_COLOR, philo->shared_attr,
-		id);
+	return_message(PURPLE " is thinking\n" QUIT_COLOR, philo->shared_attr, id);
 }
 
-void single_philo(t_philo *attr, int left)
+void	single_philo(t_philo *attr, int left)
 {
 	usleep(attr->shared_attr->time_to_die * 1000);
 	attr->shared_attr->stop_status = 0;
@@ -42,8 +41,8 @@ void single_philo(t_philo *attr, int left)
 void	eating(t_philo *attr, int left, int right, int id)
 {
 	pthread_mutex_lock(&attr->shared_attr->fork_mutexes[left]);
-	return_message(GREEN " has taken a fork\n" QUIT_COLOR,
-		attr->shared_attr, id);
+	return_message(GREEN " has taken a fork\n" QUIT_COLOR, attr->shared_attr,
+		id);
 	if (attr->shared_attr->nbr_of_philo == 1)
 		single_philo(attr, left);
 	else
